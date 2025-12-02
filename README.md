@@ -20,4 +20,7 @@ Para usar estas ferramentas, precisamos de criar um "Favorito Inteligente" (Book
 3.  **URL (ou Endereço):** Copie e cole **todo** o código abaixo:
 
 ```javascript
-javascript:(function(){var s=document.createElement('script');s.src='[https://cdn.jsdelivr.net/gh/SEU_USUARIO_GITHUB/automacao-cadastro/clientes.js?v='+Date.now();document.body.appendChild(s](https://cdn.jsdelivr.net/gh/SEU_USUARIO_GITHUB/automacao-cadastro/clientes.js?v='+Date.now();document.body.appendChild(s));})();
+javascript:(function(){    var script = document.createElement('script');    script.src = 'https://cdn.jsdelivr.net/gh/GSNasciment0/automacoes-rm/clientes.js?v=%27 + Date.now();    document.body.appendChild(script);})();
+
+```javascript
+javascript:(function(){    var script = document.createElement('script');    script.src = 'https://cdn.jsdelivr.net/gh/GSNasciment0/automacoes-rm/veiculos.js?v=%27 + Date.now();    document.body.appendChild(script);})();
