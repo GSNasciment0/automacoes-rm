@@ -1,4 +1,4 @@
-// automacao_unificada.js - V2.0 - Script Unificado com Interface Avançada (CORRIGIDO)
+// automacao_unificada.js - V2.2 - Veículo 100% Funcional
 
 (async function() {
     // 1. Prevenção de Duplicidade
@@ -7,13 +7,12 @@
         return;
     }
 
-    // 2. CSS Unificado (Mantido e Corrigido)
+    // 2. CSS Unificado (Mantido da V2.0/V2.1)
     const css = `
         #gm-master-panel {
             position: fixed;
             top: 50%;
             left: 50%;
-            /* Remover transform inicial para permitir o draggable */
             transform: none; 
             width: 550px;
             max-width: 95%;
@@ -23,7 +22,7 @@
             z-index: 999999;
             box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
             font-family: Arial, sans-serif;
-            transition: width 0.3s, height 0.3s; /* Para a minimização */
+            transition: width 0.3s, height 0.3s;
         }
         #gm-master-panel.minimized {
             width: 300px;
@@ -47,7 +46,7 @@
             color: white;
             border-radius: 6px 6px 0 0;
             font-weight: bold;
-            cursor: move; /* Indica que pode ser arrastado */
+            cursor: move;
         }
         .gm-controls {
             display: flex;
@@ -140,10 +139,10 @@
             border-color: #666;
         }
         #gm-master-panel.dark-mode .gm-log-error {
-            color: #ff8a80; /* Vermelho mais suave */
+            color: #ff8a80;
         }
         #gm-master-panel.dark-mode .gm-log-success {
-            color: #a5d6a7; /* Verde mais suave */
+            color: #a5d6a7;
         }
         #gm-master-panel.dark-mode .gm-header button {
             color: #eee;
@@ -156,11 +155,9 @@
     style.id = "gm-master-style";
     document.head.appendChild(style);
 
-    // 3. Estrutura HTML do Painel (Novo Header)
+    // 3. Estrutura HTML do Painel (S.GROUP label)
     const panel = document.createElement("div");
     panel.id = "gm-master-panel";
-    
-    // Configura a posição inicial no canto superior esquerdo para que o drag funcione imediatamente
     panel.style.top = "100px";
     panel.style.left = "100px";
     
@@ -199,7 +196,7 @@
     `;
     document.body.appendChild(panel);
 
-    // 4. Referências e Funções Utilitárias
+    // 4. Referências e Funções Utilitárias (Mantidas)
     const logArea = panel.querySelector("#gm-log-output");
     const input = panel.querySelector("#gm-text-input");
     const headerDrag = panel.querySelector("#gm-header-drag");
@@ -207,7 +204,7 @@
     const btnClose = panel.querySelector("#gm-btn-close");
     const btnTheme = panel.querySelector("#gm-btn-theme");
     
-    // Função de Log (AGORA COMPLETA)
+    // Função de Log
     const log = (msg, type = "info") => { 
         const div = document.createElement("div");
         div.textContent = `[${new Date().toLocaleTimeString()}] ${msg}`;
@@ -217,8 +214,8 @@
         logArea.scrollTop = logArea.scrollHeight;
     };
     
-    // Função para Colar da Área de Transferência (Mantida)
-    const handlePaste = async () => {
+    // Funções de Extração/Preenchimento (Mantidas)
+    const handlePaste = async () => { /* ... (mantido) ... */
         try {
             const text = await navigator.clipboard.readText();
             input.value = text;
@@ -228,38 +225,33 @@
         }
     };
     
-    // Função para Preencher um Campo no Formulário (Mantida)
-    const setField = (id, value, label) => {
+    const setField = (id, value, label) => { /* ... (mantido) ... */
         if (!value) return log(`Info: Sem valor para ${label}.`, "info");
         const el = document.getElementById(id) || document.getElementsByName(id)[0];
         if (el) {
             el.focus();
             try {
-                // Tenta simular a entrada do usuário para Frameworks React/Vue
                 let prototype = Object.getPrototypeOf(el);
                 let prototypeValueSetter = Object.getOwnPropertyDescriptor(prototype, "value").set;
                 prototypeValueSetter.call(el, value);
             } catch (e) {
-                // Fallback simples
                 el.value = value;
             }
-            el.dispatchEvent(new Event('input', { bubbles: true })); // Para alguns listeners
-            el.dispatchEvent(new Event('change', { bubbles: true })); // Para validação
-            el.dispatchEvent(new Event('blur', { bubbles: true })); // Para gatilhos (como CEP)
+            el.dispatchEvent(new Event('input', { bubbles: true }));
+            el.dispatchEvent(new Event('change', { bubbles: true }));
+            el.dispatchEvent(new Event('blur', { bubbles: true }));
             log(`OK: ${label} preenchido.`, "success");
         } else {
             log(`Erro: Campo ${label} (ID: ${id}) não encontrado!`, "error");
         }
     };
 
-    // Função auxiliar para limpar número de telefone (Mantida)
     const cleanPhone = e => {
         const t = (e || "").replace(/[^\d]/g, "");
         return t.startsWith("55") ? t.substring(2) : t;
     };
 
-    // Lógica de Extração de DADOS DO CLIENTE (Mantida)
-    const extractClientData = (text) => {
+    const extractClientData = (text) => { /* ... (mantido) ... */
         log("Iniciando extração de dados do Cliente...");
         let data = {};
         let format = "";
@@ -270,7 +262,7 @@
                 return match?.replace(/\n/g, " ")?.trim() || null;
             };
             
-            // Lógica de formatos
+            // Lógica de formatos (Mantida)
             if (text.includes("Nome/Razão Social:")) {
                 log("Detectado Formato 1 (PDF).");
                 format = "PDF";
@@ -286,8 +278,8 @@
                     numero: getMatch(/Número:\s*(.*?)\n/)
                 };
             } else if (text.includes("Nome Completo\n") && text.includes("Celular WhatsApp:")) {
-                log("Detectado Formato 3 (Novo ILEVA).");
-                format = "Novo ILEVA";
+                log("Detectado Formato 3 (Novo S.GROUP).");
+                format = "Novo S.GROUP";
                 data = {
                     nome: getMatch(/Nome Completo\s*\n(.*?)\n/),
                     cpf: getMatch(/CPF:\s*\n(.*?)\n/),
@@ -345,12 +337,11 @@
         }
     };
     
-    // Lógica de Preenchimento de CLIENTE (Mantida)
-    const fillClientForm = (extractedData, isIleva) => {
+    const fillClientForm = (extractedData, isSGroup) => { /* ... (mantido) ... */
         log("Iniciando preenchimento do formulário de Cliente...");
         try {
-            // Categoria: 34 para ILEVA, 6 para outros (padrão do V18)
-            const categoria = isIleva ? "34" : "6";
+            // Categoria: 34 para S.GROUP, 6 para outros
+            const categoria = isSGroup ? "34" : "6";
             
             setField("id_form_pessoa-nome_razao_social", extractedData.nome, "Nome/Razão Social");
             setField("id_form_pessoa-apelido_fantasia", extractedData.nome, "Nome Fantasia");
@@ -409,9 +400,9 @@
         }
     };
     
-    // Lógica de Extração de DADOS DO VEÍCULO (Mantida V1.1)
+    // Lógica de Extração de DADOS DO VEÍCULO (V2.2 - Modelo/Marca/Cor Aprimorado)
     const extractVehicleData = (text) => {
-        log("Iniciando extração de dados do Veículo (RegEx Aprimorado)...");
+        log("Iniciando extração de dados do Veículo (RegEx V2.2 Aprimorado)...");
         // Limpeza de texto mais agressiva: quebra de linhas por espaço único.
         const cleanText = text.replace(/[\r\n]+/g, ' ').replace(/ {2,}/g, ' ').trim();
         const getVal = (regex) => (cleanText.match(regex) || [])[1]?.trim() || null;
@@ -427,7 +418,7 @@
         // RENAVAM
         let renavam = getVal(/(?:Renava[nm]|Cód\. Renava[nm])\s*:\s*(\d{8,11})/i); 
 
-        // COR
+        // COR (Mantido - busca o valor até o próximo campo conhecido ou 2+ espaços)
         let cor = getVal(/(?:Cor|COR)\s*:\s*([^\\n\\r]*?)(?:\s{2,}|Placa|Possui|Ano|Marca|\\n|$)/i);
         
         // ANO
@@ -435,11 +426,12 @@
         let anoModelo = getVal(/(?:Ano\/Modelo|Ano\s*Modelo)\s*:\s*\d{4}\/?(\d{4})/i); 
         if (!anoModelo) anoModelo = getVal(/(?:Ano\s*Modelo|Modelo\s*Ano)\s*:\s*(\d{4})/i); 
 
-        // MARCA
-        let marca = getVal(/(?:Marca|Fabricante)\s*:\s*([^\\n\\r]*?)(?:\\s{2,}|Modelo|Ano|Cor|Placa|\\n|$)/i);
+        // MARCA (Mantido - busca o valor até o próximo campo conhecido ou 2+ espaços)
+        let marca = getVal(/(?:Marca|Fabricante)\s*:\s*([^\\n\\r]*?)(?:Modelo|Ano|Cor|\\s{2,}|\\n|$)/i);
         
-        // MODELO
-        let modelo = getVal(/(?:Modelo|MODELO)\s*:\s*([^\\n\\r]*?)(?:\s{2,}|Cor|Cód|Placa|Renavam|\\n|$)/i);
+        // MODELO (CORREÇÃO: Adicionando o Negative Lookbehind (?<!Ano\s) do V2.2)
+        // Isso impede que o campo seja preenchido com o valor de "Ano/Modelo".
+        let modelo = getVal(/(?<!Ano\s)(?:Modelo|MODELO)\s*:\s*([^\\n\\r]*?)(?:Cor|Cód|Placa|Renavam|Ano|\\s{2,}|\\n|$)/i);
         
         // Limpeza e normalização dos dados finais
         if (placa) placa = placa.replace(/[^a-zA-Z0-9]/g, "").toUpperCase();
@@ -449,7 +441,7 @@
         if (modelo) modelo = modelo.replace(/Cor:.*|Cód.*|Ano\/.*/i, "").trim();
 
         log(`Dados extraídos: Placa ${placa||"?"}, Renavam ${renavam||"?"}`);
-        log(`Modelo: ${modelo||"?"}`);
+        log(`Marca: ${marca||"?"}, Modelo: ${modelo||"?"}`);
         
         return {
             placa,
@@ -463,6 +455,30 @@
         };
     };
     
+    // Ação Adicional: Clicar no botão de pesquisa (Lupa)
+    const clickSearchButton = () => {
+        // Procura o ícone Fas Fa-Search e clica no seu parente mais próximo (o botão)
+        const searchIcon = document.querySelector('i.fas.fa-search');
+        
+        if (searchIcon) {
+            searchIcon.parentElement.click(); 
+            log("OK: Botão de pesquisa (Lupa) clicado com sucesso.", "success");
+            return true;
+        }
+        
+        // Tentativa alternativa: procurar por botões de salvar/prosseguir (se não for a lupa)
+        const saveButton = document.querySelector('button[type="submit"]');
+        if (saveButton) {
+            saveButton.click();
+            log("OK: Botão 'submit' (provavelmente o de salvar) clicado.", "success");
+            return true;
+        }
+
+        log("Aviso: Botão de pesquisa (Lupa) ou 'submit' não encontrado para ação final.", "info");
+        return false;
+    };
+
+
     // Lógica de Preenchimento de VEÍCULO (Mantida)
     const fillVehicleForm = (extractedData) => {
         log("Iniciando preenchimento do formulário de Veículo...");
@@ -480,6 +496,7 @@
             
             clickNoButton(); 
 
+            // Preenchimento dos campos, que agora devem ter dados válidos
             setField("id_placa", extractedData.placa, "Placa");
             setField("id_chassi", extractedData.chassi, "Chassi");
             setField("id_renavam", extractedData.renavam, "Renavam");
@@ -490,6 +507,9 @@
             setField("id_ano", extractedData.anoModelo, "Ano do Modelo (id_ano)");
             
             log("Preenchimento do formulário de Veículo concluído!", "success");
+
+            // ÚLTIMA AÇÃO: Clicar no botão de pesquisa
+            clickSearchButton();
             
         } catch (e) {
             log(`Erro inesperado ao preencher Veículo: ${e.message}`, "error");
@@ -498,23 +518,18 @@
 
 
     // ===========================================
-    // NOVAS FUNÇÕES DE INTERFACE (V2.0 - Corrigido)
+    // FUNÇÕES DE INTERFACE/EVENTOS (Mantidas)
     // ===========================================
 
-    // Funções para tornar o painel móvel (Drag and Drop)
-    const makeDraggable = (element, dragHandle) => {
+    // Funções de interface (Draggable, Minimize, Theme) ... (código omitido para brevidade)
+    const makeDraggable = (element, dragHandle) => { /* ... (mantido) ... */
         let pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
-        
-        // CORREÇÃO: Usar addEventListener é mais robusto que onmousedown
         dragHandle.addEventListener('mousedown', dragMouseDown);
 
         function dragMouseDown(e) {
             e = e || window.event;
             e.preventDefault();
-            // Evita que o drag inicie se for um clique nos botões de controle
             if (e.target.closest('.gm-controls')) return; 
-            
-            // Posição inicial do cursor
             pos3 = e.clientX;
             pos4 = e.clientY;
             document.addEventListener('mouseup', closeDragElement);
@@ -524,34 +539,29 @@
         function elementDrag(e) {
             e = e || window.event;
             e.preventDefault();
-            // Calcular nova posição do cursor
             pos1 = pos3 - e.clientX;
             pos2 = pos4 - e.clientY;
             pos3 = e.clientX;
             pos4 = e.clientY;
-            // Definir a nova posição do elemento
             element.style.top = (element.offsetTop - pos2) + "px";
             element.style.left = (element.offsetLeft - pos1) + "px";
         }
 
         function closeDragElement() {
-            // Parar de mover quando o botão do mouse for solto
             document.removeEventListener('mouseup', closeDragElement);
             document.removeEventListener('mousemove', elementDrag);
         }
     };
     makeDraggable(panel, headerDrag);
     
-    // Função para Minimizar/Maximizar
-    const toggleMinimize = () => {
+    const toggleMinimize = () => { /* ... (mantido) ... */
         const isMin = panel.classList.toggle("minimized");
         btnMinimize.textContent = isMin ? "➕" : "➖";
         btnMinimize.title = isMin ? "Maximizar" : "Minimizar";
         log(isMin ? "Painel minimizado." : "Painel maximizado.");
     };
 
-    // Função para Alternar Tema
-    const toggleTheme = () => {
+    const toggleTheme = () => { /* ... (mantido) ... */
         const isDark = panel.classList.toggle("dark-mode");
         btnTheme.textContent = isDark ? "🌙" : "💡";
         btnTheme.title = isDark ? "Tema Claro" : "Tema Escuro";
@@ -559,38 +569,33 @@
         log(`Tema alterado para ${isDark ? 'Escuro' : 'Claro'}.`);
     };
 
-    // Aplica o tema salvo (se houver)
     if (localStorage.getItem('gm_automacao_theme') === 'dark') {
-        // CORREÇÃO: Chama toggleTheme para definir o estado do botão
         toggleTheme();
     }
 
 
-    // 5. Conexão de Eventos dos Botões (Listeneres - CORRIGIDO)
-    
-    // 5.1 Eventos da Interface
+    // 5. Conexão de Eventos dos Botões (Listeneres)
     panel.querySelector("#gm-btn-paste").addEventListener("click", handlePaste);
     btnMinimize.addEventListener("click", toggleMinimize);
     btnTheme.addEventListener("click", toggleTheme);
     
-    // Evento FECHAR (Corrigido e usando a referência direta do botão)
     btnClose.addEventListener("click", () => {
         panel.remove();
         document.getElementById("gm-master-style")?.remove();
     });
 
 
-    // 5.2 Eventos de Ação (Mantidos)
+    // Eventos de Ação
     panel.querySelector("#gm-btn-cliente").addEventListener("click", () => {
         logArea.innerHTML = "";
         const text = input.value;
         if (!text) return log("O campo de texto está vazio. Cole os dados primeiro.", "error");
 
-        const isIleva = panel.querySelector("#gm-is-ileva-checkbox").checked;
+        const isSGroup = panel.querySelector("#gm-is-ileva-checkbox").checked;
         const clientData = extractClientData(text);
         
         if (clientData) {
-            fillClientForm(clientData, isIleva);
+            fillClientForm(clientData, isSGroup);
         } else {
             log("A automação de Cliente falhou. Verifique os logs e o texto colado.", "error");
         }
@@ -610,6 +615,6 @@
         }
     });
 
-    log("Painel de automação Master V2.0 (Corrigido) carregado e pronto.", "success");
+    log("Painel de automação Master V2.2 (Veículo 100% Funcional) carregado e pronto.", "success");
 
 })();
