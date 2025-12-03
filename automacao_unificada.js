@@ -1,4 +1,4 @@
-// automacao_unificada.js - V2.2 - Veículo 100% Funcional
+// automacao_unificada.js - V2.3 - Veículo: RegEx Estrito e Ação Final Fixa
 
 (async function() {
     // 1. Prevenção de Duplicidade
@@ -7,7 +7,7 @@
         return;
     }
 
-    // 2. CSS Unificado (Mantido da V2.0/V2.1)
+    // 2. CSS Unificado (Mantido)
     const css = `
         #gm-master-panel {
             position: fixed;
@@ -155,7 +155,7 @@
     style.id = "gm-master-style";
     document.head.appendChild(style);
 
-    // 3. Estrutura HTML do Painel (S.GROUP label)
+    // 3. Estrutura HTML do Painel (Mantida)
     const panel = document.createElement("div");
     panel.id = "gm-master-panel";
     panel.style.top = "100px";
@@ -251,7 +251,7 @@
         return t.startsWith("55") ? t.substring(2) : t;
     };
 
-    const extractClientData = (text) => { /* ... (mantido) ... */
+    const extractClientData = (text) => { /* ... (mantido, pois o foco é o veículo agora) ... */
         log("Iniciando extração de dados do Cliente...");
         let data = {};
         let format = "";
@@ -262,7 +262,7 @@
                 return match?.replace(/\n/g, " ")?.trim() || null;
             };
             
-            // Lógica de formatos (Mantida)
+            // Lógica de formatos
             if (text.includes("Nome/Razão Social:")) {
                 log("Detectado Formato 1 (PDF).");
                 format = "PDF";
@@ -400,10 +400,10 @@
         }
     };
     
-    // Lógica de Extração de DADOS DO VEÍCULO (V2.2 - Modelo/Marca/Cor Aprimorado)
+    // Lógica de Extração de DADOS DO VEÍCULO (V2.3 - RegEx Estrito e Robusto)
     const extractVehicleData = (text) => {
-        log("Iniciando extração de dados do Veículo (RegEx V2.2 Aprimorado)...");
-        // Limpeza de texto mais agressiva: quebra de linhas por espaço único.
+        log("Iniciando extração de dados do Veículo (RegEx V2.3 Estrito)...");
+        // Limpeza de texto: converte quebras de linha para espaço único, remove múltiplos espaços.
         const cleanText = text.replace(/[\r\n]+/g, ' ').replace(/ {2,}/g, ' ').trim();
         const getVal = (regex) => (cleanText.match(regex) || [])[1]?.trim() || null;
         
@@ -418,27 +418,30 @@
         // RENAVAM
         let renavam = getVal(/(?:Renava[nm]|Cód\. Renava[nm])\s*:\s*(\d{8,11})/i); 
 
-        // COR (Mantido - busca o valor até o próximo campo conhecido ou 2+ espaços)
-        let cor = getVal(/(?:Cor|COR)\s*:\s*([^\\n\\r]*?)(?:\s{2,}|Placa|Possui|Ano|Marca|\\n|$)/i);
+        // COR (Agora para no próximo campo principal: 'Placa' ou 'Cód.fipe')
+        let cor = getVal(/(?:Cor|COR)\s*:\s*(.*?)(?:\sPlaca:|\sCód\.fipe|\sAno|\\n|$)/i);
         
         // ANO
         let anoFabricacao = getVal(/(?:Ano\s*Fabricação|Ano\s*Fab|Ano\/Modelo)\s*:\s*(\d{4})/i);
         let anoModelo = getVal(/(?:Ano\/Modelo|Ano\s*Modelo)\s*:\s*\d{4}\/?(\d{4})/i); 
         if (!anoModelo) anoModelo = getVal(/(?:Ano\s*Modelo|Modelo\s*Ano)\s*:\s*(\d{4})/i); 
 
-        // MARCA (Mantido - busca o valor até o próximo campo conhecido ou 2+ espaços)
-        let marca = getVal(/(?:Marca|Fabricante)\s*:\s*([^\\n\\r]*?)(?:Modelo|Ano|Cor|\\s{2,}|\\n|$)/i);
+        // MARCA (Agora para no próximo campo principal: 'Modelo')
+        let marca = getVal(/(?:Marca|Fabricante)\s*:\s*(.*?)(?:\sModelo:|\sAno|\\n|$)/i);
         
-        // MODELO (CORREÇÃO: Adicionando o Negative Lookbehind (?<!Ano\s) do V2.2)
-        // Isso impede que o campo seja preenchido com o valor de "Ano/Modelo".
-        let modelo = getVal(/(?<!Ano\s)(?:Modelo|MODELO)\s*:\s*([^\\n\\r]*?)(?:Cor|Cód|Placa|Renavam|Ano|\\s{2,}|\\n|$)/i);
+        // MODELO (Agora para no próximo campo principal: 'Cor' ou 'Cód.fipe')
+        // Mantido o Negative Lookbehind (?<!Ano\s) para ignorar "Ano Modelo".
+        let modelo = getVal(/(?<!Ano\s)(?:Modelo|MODELO)\s*:\s*(.*?)(?:\sCor:|\sCód\.fipe|\sPlaca:|\sAno|\\n|$)/i);
         
         // Limpeza e normalização dos dados finais
         if (placa) placa = placa.replace(/[^a-zA-Z0-9]/g, "").toUpperCase();
         if (chassi) chassi = chassi.replace(/[^a-zA-Z0-9]/g, "").toUpperCase();
         if (renavam) renavam = renavam.replace(/[^0-9]/g, "");
-        if (marca) marca = marca.replace(/Modelo:.*|Cor:.*|Placa:.*|Ano\/.*/i, "").trim();
-        if (modelo) modelo = modelo.replace(/Cor:.*|Cód.*|Ano\/.*/i, "").trim();
+
+        // Limpeza de espaços em excesso nos valores capturados
+        if (marca) marca = marca.replace(/\s{2,}/g, ' ').trim();
+        if (modelo) modelo = modelo.replace(/\s{2,}/g, ' ').trim();
+        if (cor) cor = cor.replace(/\s{2,}/g, ' ').trim();
 
         log(`Dados extraídos: Placa ${placa||"?"}, Renavam ${renavam||"?"}`);
         log(`Marca: ${marca||"?"}, Modelo: ${modelo||"?"}`);
@@ -455,31 +458,35 @@
         };
     };
     
-    // Ação Adicional: Clicar no botão de pesquisa (Lupa)
+    // Ação Adicional: Clicar no botão de pesquisa (Lupa) - Aprimorado
     const clickSearchButton = () => {
-        // Procura o ícone Fas Fa-Search e clica no seu parente mais próximo (o botão)
+        // 1. Tenta encontrar e clicar no elemento que contém o ícone Fas Fa-Search
         const searchIcon = document.querySelector('i.fas.fa-search');
         
         if (searchIcon) {
-            searchIcon.parentElement.click(); 
-            log("OK: Botão de pesquisa (Lupa) clicado com sucesso.", "success");
-            return true;
+            // Tenta clicar no elemento pai que é um botão
+            const buttonElement = searchIcon.closest('button') || searchIcon.parentElement;
+            if (buttonElement) {
+                buttonElement.click(); 
+                log("OK: Botão de pesquisa (Lupa) clicado com sucesso (Via ícone).", "success");
+                return true;
+            }
         }
         
-        // Tentativa alternativa: procurar por botões de salvar/prosseguir (se não for a lupa)
+        // 2. Fallback: Procura o botão de submissão (submit) padrão
         const saveButton = document.querySelector('button[type="submit"]');
         if (saveButton) {
             saveButton.click();
-            log("OK: Botão 'submit' (provavelmente o de salvar) clicado.", "success");
+            log("OK: Botão 'submit' (provavelmente o de salvar/pesquisar) clicado.", "success");
             return true;
         }
 
-        log("Aviso: Botão de pesquisa (Lupa) ou 'submit' não encontrado para ação final.", "info");
+        log("Aviso: Botão de pesquisa (Lupa) ou 'submit' não encontrado para ação final. O preenchimento foi concluído.", "info");
         return false;
     };
 
 
-    // Lógica de Preenchimento de VEÍCULO (Mantida)
+    // Lógica de Preenchimento de VEÍCULO (Mantida com Ação Final)
     const fillVehicleForm = (extractedData) => {
         log("Iniciando preenchimento do formulário de Veículo...");
         try {
@@ -521,7 +528,6 @@
     // FUNÇÕES DE INTERFACE/EVENTOS (Mantidas)
     // ===========================================
 
-    // Funções de interface (Draggable, Minimize, Theme) ... (código omitido para brevidade)
     const makeDraggable = (element, dragHandle) => { /* ... (mantido) ... */
         let pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
         dragHandle.addEventListener('mousedown', dragMouseDown);
@@ -615,6 +621,6 @@
         }
     });
 
-    log("Painel de automação Master V2.2 (Veículo 100% Funcional) carregado e pronto.", "success");
+    log("Painel de automação Master V2.3 (Veículo Corrigido/Ação Final Aprimorada) carregado e pronto.", "success");
 
 })();
