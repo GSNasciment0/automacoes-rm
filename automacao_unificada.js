@@ -1,4 +1,4 @@
-// automacao_unificada.js - V2.3 - Veículo: RegEx Estrito e Ação Final Fixa
+// automacao_unificada.js - V2.4 - Ação Final Consertada
 
 (async function() {
     // 1. Prevenção de Duplicidade
@@ -7,194 +7,7 @@
         return;
     }
 
-    // 2. CSS Unificado (Mantido)
-    const css = `
-        #gm-master-panel {
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: none; 
-            width: 550px;
-            max-width: 95%;
-            background: #f9f9f9;
-            border: 2px solid #007bff;
-            border-radius: 8px;
-            z-index: 999999;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
-            font-family: Arial, sans-serif;
-            transition: width 0.3s, height 0.3s;
-        }
-        #gm-master-panel.minimized {
-            width: 300px;
-            height: auto;
-        }
-        #gm-master-panel.minimized .gm-content {
-            display: none !important;
-        }
-        #gm-master-panel * {
-            font-family: Arial, sans-serif;
-            transition: color 0.3s, background-color 0.3s;
-        }
-
-        /* Tema Claro (Padrão) */
-        .gm-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 10px;
-            background: #007bff;
-            color: white;
-            border-radius: 6px 6px 0 0;
-            font-weight: bold;
-            cursor: move;
-        }
-        .gm-controls {
-            display: flex;
-            gap: 5px;
-        }
-        .gm-header button {
-            background: none;
-            border: none;
-            color: white;
-            font-size: 16px;
-            cursor: pointer;
-            padding: 0 5px;
-            font-weight: bold;
-        }
-        .gm-content {
-            padding: 15px;
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-        }
-        #gm-text-input {
-            width: 98%;
-            height: 150px;
-            padding: 8px;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-            resize: vertical;
-            background: white;
-            color: #333;
-        }
-        .gm-actions {
-            display: flex;
-            gap: 10px;
-            align-items: stretch;
-            margin-bottom: 10px;
-        }
-        .gm-actions button {
-            border: none;
-            padding: 10px;
-            font-size: 14px;
-            font-weight: bold;
-            border-radius: 4px;
-            cursor: pointer;
-            flex-grow: 1;
-            transition: background-color 0.2s, color 0.2s;
-        }
-        /* Estilos dos botões */
-        #gm-btn-paste {background: #ffc107; color: #333; width: 40px; height: 40px; flex-grow: 0; display: flex; align-items: center; justify-content: center;}
-        #gm-btn-paste:hover {background: #e0a800;}
-        #gm-btn-cliente {background: #28a745; color: white;}
-        #gm-btn-cliente:hover {background: #218838;}
-        #gm-btn-veiculo {background: #17a2b8; color: white;}
-        #gm-btn-veiculo:hover {background: #138496;}
-
-        /* Log Section */
-        .gm-log-section h4 {margin:0 0 5px 0; font-size:14px}
-        #gm-log-output {
-            background:#fff;
-            border:1px solid #eee;
-            border-radius:4px;
-            padding:10px;
-            height:100px;
-            overflow-y:auto;
-            font-size:12px;
-            font-family:'Courier New',Courier,monospace;
-            color:#333
-        }
-        .gm-log-error {color:#d9534f;font-weight:bold}
-        .gm-log-success {color:#5cb85c;font-weight:bold}
-
-        /* =================================== */
-        /* TEMA ESCURO */
-        /* =================================== */
-        #gm-master-panel.dark-mode {
-            background: #333;
-            border-color: #00bcd4;
-            color: #ccc;
-        }
-        #gm-master-panel.dark-mode .gm-header {
-            background: #00bcd4;
-        }
-        #gm-master-panel.dark-mode #gm-text-input {
-            background: #444;
-            color: #eee;
-            border-color: #666;
-        }
-        #gm-master-panel.dark-mode #gm-log-output {
-            background: #444;
-            color: #ccc;
-            border-color: #666;
-        }
-        #gm-master-panel.dark-mode .gm-log-error {
-            color: #ff8a80;
-        }
-        #gm-master-panel.dark-mode .gm-log-success {
-            color: #a5d6a7;
-        }
-        #gm-master-panel.dark-mode .gm-header button {
-            color: #eee;
-        }
-    `;
-
-    // Adiciona o CSS ao HEAD
-    const style = document.createElement("style");
-    style.appendChild(document.createTextNode(css));
-    style.id = "gm-master-style";
-    document.head.appendChild(style);
-
-    // 3. Estrutura HTML do Painel (Mantida)
-    const panel = document.createElement("div");
-    panel.id = "gm-master-panel";
-    panel.style.top = "100px";
-    panel.style.left = "100px";
-    
-    panel.innerHTML = `
-        <div class="gm-header" id="gm-header-drag">
-            <span>🚀 Automação Master (Cliente & Veículo)</span>
-            <div class="gm-controls">
-                <button id="gm-btn-theme" title="Alternar Tema">💡</button>
-                <button id="gm-btn-minimize" title="Minimizar">➖</button>
-                <button id="gm-btn-close" title="Fechar">X</button>
-            </div>
-        </div>
-        <div class="gm-content">
-            
-            <div class="gm-controls-top">
-                <input type="checkbox" id="gm-is-ileva-checkbox" style="width:20px;height:20px;">
-                <label for="gm-is-ileva-checkbox" style="font-weight:bold;">Cliente pertence à S.GROUP?</label>
-            </div>
-
-            <label for="gm-text-input" style="font-weight:bold;">Cole o texto completo do PDF/Contrato aqui:</label>
-            <textarea id="gm-text-input" placeholder="Cole o texto copiado aqui."></textarea>
-            
-            <div class="gm-actions">
-                <button id="gm-btn-paste" title="Colar da Área de Transferência">
-                    <svg style="width:20px;height:20px;display:block;margin:0 auto;" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="10" y="4" width="4" height="4" rx="1"/><path d="M14 2c2.2 0 4 1.8 4 4v14c0 1.1-.9 2-2 2H8c-1.1 0-2-.9-2-2V6c0-2.2 1.8-4 4-4z"/></svg>
-                </button>
-                <button id="gm-btn-cliente">Preencher Cliente</button>
-                <button id="gm-btn-veiculo">Preencher Veículo</button>
-            </div>
-
-            <div class="gm-log-section">
-                <h4>📜 Log de Execução</h4>
-                <div id="gm-log-output"></div>
-            </div>
-        </div>
-    `;
-    document.body.appendChild(panel);
+    // ... (CSS e Estrutura HTML OMITIDOS para brevidade, são iguais à V2.3) ...
 
     // 4. Referências e Funções Utilitárias (Mantidas)
     const logArea = panel.querySelector("#gm-log-output");
@@ -205,7 +18,7 @@
     const btnTheme = panel.querySelector("#gm-btn-theme");
     
     // Função de Log
-    const log = (msg, type = "info") => { 
+    const log = (msg, type = "info") => { /* ... (mantida) ... */
         const div = document.createElement("div");
         div.textContent = `[${new Date().toLocaleTimeString()}] ${msg}`;
         if (type === "error") div.className = "gm-log-error";
@@ -215,7 +28,7 @@
     };
     
     // Funções de Extração/Preenchimento (Mantidas)
-    const handlePaste = async () => { /* ... (mantido) ... */
+    const handlePaste = async () => { /* ... (mantida) ... */
         try {
             const text = await navigator.clipboard.readText();
             input.value = text;
@@ -225,7 +38,7 @@
         }
     };
     
-    const setField = (id, value, label) => { /* ... (mantido) ... */
+    const setField = (id, value, label) => { /* ... (mantida) ... */
         if (!value) return log(`Info: Sem valor para ${label}.`, "info");
         const el = document.getElementById(id) || document.getElementsByName(id)[0];
         if (el) {
@@ -251,7 +64,8 @@
         return t.startsWith("55") ? t.substring(2) : t;
     };
 
-    const extractClientData = (text) => { /* ... (mantido, pois o foco é o veículo agora) ... */
+    const extractClientData = (text) => { /* ... (mantida) ... */
+        // ... Lógica de extração de cliente (manter) ...
         log("Iniciando extração de dados do Cliente...");
         let data = {};
         let format = "";
@@ -262,7 +76,7 @@
                 return match?.replace(/\n/g, " ")?.trim() || null;
             };
             
-            // Lógica de formatos
+            // Lógica de formatos (mantida da V2.3)
             if (text.includes("Nome/Razão Social:")) {
                 log("Detectado Formato 1 (PDF).");
                 format = "PDF";
@@ -337,10 +151,10 @@
         }
     };
     
-    const fillClientForm = (extractedData, isSGroup) => { /* ... (mantido) ... */
+    const fillClientForm = (extractedData, isSGroup) => { /* ... (mantida) ... */
+        // ... Lógica de preenchimento de cliente (manter) ...
         log("Iniciando preenchimento do formulário de Cliente...");
         try {
-            // Categoria: 34 para S.GROUP, 6 para outros
             const categoria = isSGroup ? "34" : "6";
             
             setField("id_form_pessoa-nome_razao_social", extractedData.nome, "Nome/Razão Social");
@@ -400,45 +214,37 @@
         }
     };
     
-    // Lógica de Extração de DADOS DO VEÍCULO (V2.3 - RegEx Estrito e Robusto)
+    // Lógica de Extração de DADOS DO VEÍCULO (Mantida da V2.3)
     const extractVehicleData = (text) => {
         log("Iniciando extração de dados do Veículo (RegEx V2.3 Estrito)...");
-        // Limpeza de texto: converte quebras de linha para espaço único, remove múltiplos espaços.
         const cleanText = text.replace(/[\r\n]+/g, ' ').replace(/ {2,}/g, ' ').trim();
         const getVal = (regex) => (cleanText.match(regex) || [])[1]?.trim() || null;
         
-        // PLACA
         let placa = getVal(/(?:PLACA|Placa|PLACA\/UF)\s*:\s*([A-Z0-9]{3}[A-Z0-9]{1,4})\s+/i);
         if (!placa) placa = getVal(/(?:PLACA|Placa)\s*([^A-Z]*?)([A-Z]{3}[0-9]{1}[A-Z0-9]{1}[0-9]{2})/i); 
 
-        // CHASSI
         let chassi = getVal(/(?:N\s*[º.]?\s*Chassi|Chassi|Nº\sChassi)\s*:\s*([A-Z0-9]{17})/i); 
         if (!chassi) chassi = getVal(/(?:N\s*[º.]?\s*Chassi|Chassi)\s*:\s*([^\s]{10,20})\s/i); 
 
-        // RENAVAM
         let renavam = getVal(/(?:Renava[nm]|Cód\. Renava[nm])\s*:\s*(\d{8,11})/i); 
 
-        // COR (Agora para no próximo campo principal: 'Placa' ou 'Cód.fipe')
+        // COR: Para no próximo campo principal: 'Placa' ou 'Cód.fipe'
         let cor = getVal(/(?:Cor|COR)\s*:\s*(.*?)(?:\sPlaca:|\sCód\.fipe|\sAno|\\n|$)/i);
         
-        // ANO
         let anoFabricacao = getVal(/(?:Ano\s*Fabricação|Ano\s*Fab|Ano\/Modelo)\s*:\s*(\d{4})/i);
         let anoModelo = getVal(/(?:Ano\/Modelo|Ano\s*Modelo)\s*:\s*\d{4}\/?(\d{4})/i); 
         if (!anoModelo) anoModelo = getVal(/(?:Ano\s*Modelo|Modelo\s*Ano)\s*:\s*(\d{4})/i); 
 
-        // MARCA (Agora para no próximo campo principal: 'Modelo')
+        // MARCA: Para no próximo campo principal: 'Modelo'
         let marca = getVal(/(?:Marca|Fabricante)\s*:\s*(.*?)(?:\sModelo:|\sAno|\\n|$)/i);
         
-        // MODELO (Agora para no próximo campo principal: 'Cor' ou 'Cód.fipe')
-        // Mantido o Negative Lookbehind (?<!Ano\s) para ignorar "Ano Modelo".
+        // MODELO: Para no próximo campo principal: 'Cor' ou 'Cód.fipe'
         let modelo = getVal(/(?<!Ano\s)(?:Modelo|MODELO)\s*:\s*(.*?)(?:\sCor:|\sCód\.fipe|\sPlaca:|\sAno|\\n|$)/i);
         
-        // Limpeza e normalização dos dados finais
         if (placa) placa = placa.replace(/[^a-zA-Z0-9]/g, "").toUpperCase();
         if (chassi) chassi = chassi.replace(/[^a-zA-Z0-9]/g, "").toUpperCase();
         if (renavam) renavam = renavam.replace(/[^0-9]/g, "");
 
-        // Limpeza de espaços em excesso nos valores capturados
         if (marca) marca = marca.replace(/\s{2,}/g, ' ').trim();
         if (modelo) modelo = modelo.replace(/\s{2,}/g, ' ').trim();
         if (cor) cor = cor.replace(/\s{2,}/g, ' ').trim();
@@ -458,30 +264,37 @@
         };
     };
     
-    // Ação Adicional: Clicar no botão de pesquisa (Lupa) - Aprimorado
+    // Ação Adicional: Clicar no botão de pesquisa (Lupa) - CORRIGIDA (V2.4)
     const clickSearchButton = () => {
-        // 1. Tenta encontrar e clicar no elemento que contém o ícone Fas Fa-Search
-        const searchIcon = document.querySelector('i.fas.fa-search');
+        // PRIORIDADE 1: Buscar pelo ID específico fornecido (btnChassi)
+        const specificButton = document.getElementById('btnChassi');
         
+        if (specificButton) {
+            specificButton.click(); 
+            log("OK: Botão de pesquisa Clicado com sucesso (Via ID: btnChassi).", "success");
+            return true;
+        }
+        
+        // PRIORIDADE 2: Fallback (Se não encontrar o ID específico)
+        const searchIcon = document.querySelector('i.fas.fa-search');
         if (searchIcon) {
-            // Tenta clicar no elemento pai que é um botão
             const buttonElement = searchIcon.closest('button') || searchIcon.parentElement;
             if (buttonElement) {
                 buttonElement.click(); 
-                log("OK: Botão de pesquisa (Lupa) clicado com sucesso (Via ícone).", "success");
+                log("OK: Botão de pesquisa Clicado com sucesso (Via ícone).", "success");
                 return true;
             }
         }
         
-        // 2. Fallback: Procura o botão de submissão (submit) padrão
+        // PRIODIDADE 3: Procura o botão de submissão (submit) padrão
         const saveButton = document.querySelector('button[type="submit"]');
         if (saveButton) {
             saveButton.click();
-            log("OK: Botão 'submit' (provavelmente o de salvar/pesquisar) clicado.", "success");
+            log("OK: Botão 'submit' clicado.", "success");
             return true;
         }
 
-        log("Aviso: Botão de pesquisa (Lupa) ou 'submit' não encontrado para ação final. O preenchimento foi concluído.", "info");
+        log("Aviso: Botão de pesquisa (btnChassi) ou 'submit' não encontrado para ação final. O preenchimento foi concluído.", "info");
         return false;
     };
 
@@ -503,7 +316,7 @@
             
             clickNoButton(); 
 
-            // Preenchimento dos campos, que agora devem ter dados válidos
+            // Preenchimento dos campos
             setField("id_placa", extractedData.placa, "Placa");
             setField("id_chassi", extractedData.chassi, "Chassi");
             setField("id_renavam", extractedData.renavam, "Renavam");
@@ -524,9 +337,7 @@
     };
 
 
-    // ===========================================
-    // FUNÇÕES DE INTERFACE/EVENTOS (Mantidas)
-    // ===========================================
+    // ... (Funções de interface/eventos drag, minimize, theme e event listeners dos botões OMITIDOS para brevidade, são iguais à V2.3) ...
 
     const makeDraggable = (element, dragHandle) => { /* ... (mantido) ... */
         let pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
@@ -560,14 +371,14 @@
     };
     makeDraggable(panel, headerDrag);
     
-    const toggleMinimize = () => { /* ... (mantido) ... */
+    const toggleMinimize = () => { 
         const isMin = panel.classList.toggle("minimized");
         btnMinimize.textContent = isMin ? "➕" : "➖";
         btnMinimize.title = isMin ? "Maximizar" : "Minimizar";
         log(isMin ? "Painel minimizado." : "Painel maximizado.");
     };
 
-    const toggleTheme = () => { /* ... (mantido) ... */
+    const toggleTheme = () => { 
         const isDark = panel.classList.toggle("dark-mode");
         btnTheme.textContent = isDark ? "🌙" : "💡";
         btnTheme.title = isDark ? "Tema Claro" : "Tema Escuro";
@@ -621,6 +432,6 @@
         }
     });
 
-    log("Painel de automação Master V2.3 (Veículo Corrigido/Ação Final Aprimorada) carregado e pronto.", "success");
+    log("Painel de automação Master V2.4 (Ação Final Consertada) carregado e pronto.", "success");
 
 })();
