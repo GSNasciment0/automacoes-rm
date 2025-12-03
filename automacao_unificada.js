@@ -1,4 +1,4 @@
-// automacao_unificada.js - V1.0 - Script Unificado
+// automacao_unificada.js - V1.1 - Script Unificado com RegEx de Veículo Aprimorado
 
 (async function() {
     // 1. Prevenção de Duplicidade
@@ -54,7 +54,7 @@
     const logArea = panel.querySelector("#gm-log-output");
     const input = panel.querySelector("#gm-text-input");
     
-    // Função de Log [cite: 3]
+    // Função de Log
     const log = (msg, type = "info") => {
         const div = document.createElement("div");
         div.textContent = `[${new Date().toLocaleTimeString()}] ${msg}`;
@@ -64,7 +64,7 @@
         logArea.scrollTop = logArea.scrollHeight;
     };
     
-    // Função para Colar da Área de Transferência (Async) 
+    // Função para Colar da Área de Transferência (Async)
     const handlePaste = async () => {
         try {
             const text = await navigator.clipboard.readText();
@@ -75,7 +75,7 @@
         }
     };
     
-    // Função para Preencher um Campo no Formulário 
+    // Função para Preencher um Campo no Formulário
     const setField = (id, value, label) => {
         if (!value) return log(`Info: Sem valor para ${label}.`, "info");
         const el = document.getElementById(id) || document.getElementsByName(id)[0];
@@ -99,13 +99,13 @@
         }
     };
 
-    // Função auxiliar para limpar número de telefone (remove 55 se presente) 
+    // Função auxiliar para limpar número de telefone (remove 55 se presente)
     const cleanPhone = e => {
         const t = (e || "").replace(/[^\d]/g, "");
         return t.startsWith("55") ? t.substring(2) : t;
     };
 
-    // Lógica de Extração de DADOS DO CLIENTE 
+    // Lógica de Extração de DADOS DO CLIENTE (Mantida da V18)
     const extractClientData = (text) => {
         log("Iniciando extração de dados do Cliente...");
         let data = {};
@@ -117,7 +117,7 @@
                 return match?.replace(/\n/g, " ")?.trim() || null;
             };
             
-            // Lógica de formatos (mantida do V18) 
+            // Lógica de formatos (mantida do V18)
             if (text.includes("Nome/Razão Social:")) {
                 log("Detectado Formato 1 (PDF).");
                 format = "PDF";
@@ -192,7 +192,7 @@
         }
     };
     
-    // Lógica de Preenchimento de CLIENTE 
+    // Lógica de Preenchimento de CLIENTE (Mantida da V18)
     const fillClientForm = (extractedData, isIleva) => {
         log("Iniciando preenchimento do formulário de Cliente...");
         try {
@@ -221,7 +221,7 @@
                 log("Atenção: Para o preenchimento completo do Endereço, mude para a aba 'Endereço'.", "info");
             }
 
-            // Preenchimento de Telefones [cite: 5]
+            // Preenchimento de Telefones
             if (extractedData.celular1 || extractedData.celular2) {
                 const phones = [
                     { num: extractedData.celular1, is_whatsapp: true },
@@ -230,12 +230,10 @@
 
                 for (let i = 0; i < phones.length; i++) {
                     const phone = phones[i];
-                    // Busca pelo campo de número (usando a estrutura div.itemX do V18)
                     const numField = document.querySelector(`div.item${i} input[name="form_fone-numero"]`);
                     if (numField) {
                         setField(numField.id, phone.num, `Telefone ${i+1}`); // Usa setField para simular a digitação
                         
-                        // Marca o WhatsApp apenas para o primeiro número se for o caso
                         const whatsappField = document.querySelector(`div.item${i} input[name="form_fone-whatsapp-0"]`);
                         if (i === 0 && phone.is_whatsapp && whatsappField) {
                             whatsappField.checked = true;
@@ -258,25 +256,45 @@
         }
     };
     
-    // Lógica de Extração de DADOS DO VEÍCULO 
+    // Lógica de Extração de DADOS DO VEÍCULO (APRIMORADA V1.1)
     const extractVehicleData = (text) => {
-        log("Iniciando extração de dados do Veículo...");
-        const cleanText = text.replace(/\r\n/g, "\n").replace(/\r/g, "\n").replace(/ {2,}/g, " ").trim();
+        log("Iniciando extração de dados do Veículo (RegEx Aprimorado)...");
+        // Limpeza de texto mais agressiva: quebra de linhas por espaço único.
+        const cleanText = text.replace(/[\r\n]+/g, ' ').replace(/ {2,}/g, ' ').trim();
         const getVal = (regex) => (cleanText.match(regex) || [])[1]?.trim() || null;
         
-        let placa = getVal(/Placa:\s*([^\n]*?)(?:\s*Cód|\s*Valor|\n)/i);
-        let chassi = getVal(/(?:Chassi|Nº Chassi):\s*([^\n]*?)(\s*Tipo|\s*Renava|\n)/i);
-        let renavam = getVal(/Renava[nm]:\s*([^\n]*?)(?:\s*Tipo|\s*Cota|\n)/i);
-        let cor = getVal(/Cor:\s*([^\n]*?)(?:\s*Placa|\s*Possui|\n)/i);
-        let anoFabricacao = getVal(/(?:Ano\/Modelo|Ano Fabricação):\s*(\d{4})/i);
-        let anoModelo = getVal(/Ano\/Modelo:\s*(\d{4})/i);
-        let marca = getVal(/Marca:\s*([^\n]*?)(?:\s*Modelo:|\s*Ano|\n)/i);
-        let modelo = getVal(/(?<!Ano\s)Modelo:\s*([^\n]*?)(?:\s*Cor:|\s*Cód|Ano\/|\s*Placa:|\n|$)/i);
+        // PLACA: Tenta capturar 3 a 7 caracteres alfanuméricos após a palavra-chave
+        let placa = getVal(/(?:PLACA|Placa|PLACA\/UF)\s*:\s*([A-Z0-9]{3}[A-Z0-9]{1,4})\s+/i);
+        if (!placa) placa = getVal(/(?:PLACA|Placa)\s*([^A-Z]*?)([A-Z]{3}[0-9]{1}[A-Z0-9]{1}[0-9]{2})/i); // Captura no meio de uma linha grande (Mercosul)
 
+        // CHASSI: Tenta 17 caracteres (padrão VIN) com flexibilidade no prefixo
+        let chassi = getVal(/(?:N\s*[º.]?\s*Chassi|Chassi|Nº\sChassi)\s*:\s*([A-Z0-9]{17})/i); 
+        if (!chassi) chassi = getVal(/(?:N\s*[º.]?\s*Chassi|Chassi)\s*:\s*([^\s]{10,20})\s/i); // Fallback mais amplo
+
+        // RENAVAM: Tenta 8 a 11 dígitos com flexibilidade na chave
+        let renavam = getVal(/(?:Renava[nm]|Cód\. Renava[nm])\s*:\s*(\d{8,11})/i); 
+
+        // COR: Captura até o próximo campo conhecido ou fim da linha.
+        let cor = getVal(/(?:Cor|COR)\s*:\s*([^\\n\\r]*?)(?:\s{2,}|Placa|Possui|Ano|Marca|\\n|$)/i);
+        
+        // ANO: Prioriza o ano do modelo (o segundo ano, se for o caso)
+        let anoFabricacao = getVal(/(?:Ano\s*Fabricação|Ano\s*Fab|Ano\/Modelo)\s*:\s*(\d{4})/i);
+        let anoModelo = getVal(/(?:Ano\/Modelo|Ano\s*Modelo)\s*:\s*\d{4}\/?(\d{4})/i); 
+        if (!anoModelo) anoModelo = getVal(/(?:Ano\s*Modelo|Modelo\s*Ano)\s*:\s*(\d{4})/i); 
+
+        // MARCA: Captura de forma ampla, parando no próximo campo principal
+        let marca = getVal(/(?:Marca|Fabricante)\s*:\s*([^\\n\\r]*?)(?:\\s{2,}|Modelo|Ano|Cor|Placa|\\n|$)/i);
+        
+        // MODELO: Captura de forma ampla, parando no próximo campo principal (excluindo ano para evitar confusão)
+        let modelo = getVal(/(?:Modelo|MODELO)\s*:\s*([^\\n\\r]*?)(?:\s{2,}|Cor|Cód|Placa|Renavam|\\n|$)/i);
+        
+        // Limpeza e normalização dos dados finais
         if (placa) placa = placa.replace(/[^a-zA-Z0-9]/g, "").toUpperCase();
+        if (chassi) chassi = chassi.replace(/[^a-zA-Z0-9]/g, "").toUpperCase();
+        if (renavam) renavam = renavam.replace(/[^0-9]/g, "");
         if (marca) marca = marca.replace(/Modelo:.*|Cor:.*|Placa:.*|Ano\/.*/i, "").trim();
         if (modelo) modelo = modelo.replace(/Cor:.*|Cód.*|Ano\/.*/i, "").trim();
-        
+
         log(`Dados extraídos: Placa ${placa||"?"}, Renavam ${renavam||"?"}`);
         log(`Modelo: ${modelo||"?"}`);
         
@@ -286,17 +304,18 @@
             renavam,
             cor,
             anoFabricacao,
-            anoModelo,
+            // Prioriza o anoModelo se encontrado, senão usa o anoFabricacao
+            anoModelo: anoModelo || anoFabricacao, 
             marca,
             modelo
         };
     };
     
-    // Lógica de Preenchimento de VEÍCULO 
+    // Lógica de Preenchimento de VEÍCULO (Mantida da V2.2)
     const fillVehicleForm = (extractedData) => {
         log("Iniciando preenchimento do formulário de Veículo...");
         try {
-            // Função para desmarcar a chave de rastreador (mantida do V2.2) 
+            // Função para desmarcar a chave de rastreador (mantida do V2.2)
             const clickNoButton = () => {
                 const onButton = document.querySelector(".bootstrap-switch-handle-on");
                 if (onButton && onButton.textContent.trim() === "Sim") {
@@ -317,7 +336,7 @@
             setField("id_marca", extractedData.marca, "Marca");
             setField("id_modelo", extractedData.modelo, "Modelo");
             // Usa anoModelo ou anoFabricacao se o Modelo não tiver ano específico
-            setField("id_ano", extractedData.anoModelo || extractedData.anoFabricacao, "Ano do Modelo (id_ano)");
+            setField("id_ano", extractedData.anoModelo, "Ano do Modelo (id_ano)");
             
             log("Preenchimento do formulário de Veículo concluído!", "success");
             
@@ -358,6 +377,6 @@
         }
     });
 
-    log("Painel de automação Master carregado. Aguardando interação.", "success");
+    log("Painel de automação Master V1.1 carregado e pronto.", "success");
 
 })();
