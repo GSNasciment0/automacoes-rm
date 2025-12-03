@@ -177,7 +177,7 @@
             
             <div class="gm-controls-top">
                 <input type="checkbox" id="gm-is-ileva-checkbox" style="width:20px;height:20px;">
-                <label for="gm-is-ileva-checkbox" style="font-weight:bold;">Cliente pertence à ILEVA?</label>
+                <label for="gm-is-ileva-checkbox" style="font-weight:bold;">Cliente pertence à S.GROUP?</label>
             </div>
 
             <label for="gm-text-input" style="font-weight:bold;">Cole o texto completo do PDF/Contrato aqui:</label>
