@@ -1,4 +1,5 @@
-// automacao_unificada.js - V2.16 - Data de Nascimento (Correção V18 Simples)
+// automacao_unificada.js - V2.16-C - Contador Total Persistente
+// Baseado em V2.16 (Data de Nascimento V18 Simples) com adição do Contador.
 
 (async function() { // Função principal agora é async!
     // 1. Prevenção de Duplicidade
@@ -115,6 +116,7 @@
         .gm-log-error {color:#d9534f;font-weight:bold}
         .gm-log-success {color:#5cb85c;font-weight:bold}
 
+        /* --- Dark Mode CSS (Mantido) --- */
         #gm-master-panel.dark-mode {
             background: #333;
             border-color: #00bcd4;
@@ -155,9 +157,10 @@
     const panel = document.createElement("div"); 
     panel.id = "gm-master-panel";
     
+    // ALTERAÇÃO 1: Adicionar span com ID para exibir a versão/uso
     panel.innerHTML = `
         <div class="gm-header" id="gm-header-drag">
-            <span>🚀 Automação Master (Cliente & Veículo) V2.16</span>
+            <span>🚀 Automação Master (Cliente & Veículo) <span id="gm-usage-display">V2.16-C</span></span> 
             <div class="gm-controls">
                 <button id="gm-btn-theme" title="Alternar Tema">💡</button>
                 <button id="gm-btn-minimize" title="Minimizar">➖</button>
@@ -203,6 +206,13 @@
     const btnCliente = panel.querySelector("#gm-btn-cliente");
     const btnVeiculo = panel.querySelector("#gm-btn-veiculo");
     
+    // NOVO: Referência para o display de uso
+    const usageDisplay = panel.querySelector("#gm-usage-display");
+    
+    // NOVO: Constantes para o Contador
+    const TOTAL_USAGE_KEY = 'gm-master-total-count'; 
+    const VERSION = 'V2.16-C';
+
     // Função de Log
     const log = (msg, type = "info") => { 
         const div = document.createElement("div");
@@ -216,6 +226,22 @@
     // Função de Delay Assíncrono (mantida caso necessária no futuro, mas não usada para data)
     const delay = ms => new Promise(resolve => setTimeout(resolve, ms));
     
+    // NOVO: Função para gerenciar e retornar a contagem de uso TOTAL
+    const updateTotalUsageCount = () => {
+        // Tenta ler o valor, ou assume 0 se for a primeira vez
+        let currentCount = parseInt(localStorage.getItem(TOTAL_USAGE_KEY) || '0', 10);
+        
+        // Incrementa o contador
+        currentCount += 1;
+        
+        // Salva o novo valor de volta no localStorage
+        localStorage.setItem(TOTAL_USAGE_KEY, currentCount.toString());
+        
+        return currentCount;
+    };
+
+    // (*** O restante das funções utilitárias (handlePaste, setField, extractClientData, etc.) está aqui, INTOCADO. ***)
+
     const handlePaste = async () => { 
         try {
             const text = await navigator.clipboard.readText();
@@ -237,8 +263,6 @@
             // ** 1. LÓGICA V18 SIMPLIFICADA PARA DATA NASCIMENTO **
             if (id.includes("dt_bertura_nasc")) {
                 // Apenas define o valor e dispara 'change', sem focus/blur/timeouts.
-                // Isso evita a ativação da lógica de limpeza/validação agressiva do Datepicker.
-                // Replicando a única lógica que funcionava na V18.
                 el.value = value; 
                 el.dispatchEvent(new Event('change', { bubbles: true }));
                 log(`OK: ${label} preenchido com lógica V18 (Simplificada e Segura).`, "success");
@@ -418,7 +442,6 @@
             // ** CHAMADA CRÍTICA: Data de Nascimento (Usa a lógica V18 interna) **
             setField("id_form_pessoa-dt_bertura_nasc", extractedData.nascimento, "Data Nascimento");
             
-            // ** V2.16: REMOVIDO o 'await delay(150)' **
             // O setField da Data agora usa a lógica V18 síncrona e segura, não precisa de delay.
             
             setField("id_form_pessoa-categoria", categoria, "Categoria (Valor Selecionado)");
@@ -589,6 +612,16 @@
         }
     });
 
-    log("Painel de automação Master V2.16 (Data de Nascimento V18 Simples) carregado e pronto.", "success");
+    // ALTERAÇÃO 3: Lógica de Contador de Execuções TOTAL (Ao final da inicialização)
+    const currentTotalCount = updateTotalUsageCount(); // Chama a função para incrementar e obter o valor
+
+    // Exibe no painel e no console
+    if (usageDisplay) {
+        usageDisplay.textContent = `${VERSION} | Uso Total #${currentTotalCount}`;
+    }
+    
+    console.log(`Painel de automação Master ${VERSION} carregado. Uso Total: ${currentTotalCount} execuções.`);
+    log(`Painel de automação Master ${VERSION} (Contador Total) carregado. Uso Total: ${currentTotalCount}.`, "success");
+
 
 })();
